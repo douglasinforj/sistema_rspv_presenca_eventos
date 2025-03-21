@@ -10,4 +10,8 @@ class RSVPForm(forms.ModelForm):
 class ConvidadoForm(forms.ModelForm):
     class Meta:
         model = Convidado 
-        fields = ['nome', 'cpf','email', 'evento']
+        fields = ['nome', 'cpf','email', 'telefone', 'evento']
+
+
+class UploadFileForm(forms.Form):
+    file = forms.FileField(label="Selecione um aqruivo CSV ou Excel")
