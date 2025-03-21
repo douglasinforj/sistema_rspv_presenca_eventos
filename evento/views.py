@@ -4,7 +4,7 @@ from .forms import RSVPForm
 
 def lista_eventos(request):
     eventos = Evento.objects.all()
-    return render(render, 'evento/lista_eventos.html')
+    return render(request, 'evento/lista_eventos.html', {'eventos': eventos})
 
 
 
