@@ -21,7 +21,7 @@ class Convidado(models.Model):
         return f"{self.nome} ({self.email})"
     
 class Confirmacao(models.Model):
-    convidado = models.OneToOneField(Convidado, on_delete=models.CASCADE)
+    convidado = models.OneToOneField(Convidado, on_delete=models.CASCADE, null=True, blank=True)
     confirmado = models.BooleanField(default=False)
     restricoes_alimentares = models.TextField(blank=True, null=True)
 
