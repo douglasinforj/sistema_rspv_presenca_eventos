@@ -1,24 +1,21 @@
-{% block content %}
-<h2>{{ evento.nome }}</h2>
-<p>{{ evento.descricao }}</p>
-<p><strong>Data:</strong> {{ evento.data }}</p>
-<p><strong>Local:</strong> {{ evento.local }}</p>
+{% extends 'base.html' %}
 
-<h3>Convidados</h3>
-<ul>
-    {% for convidado in convidados %}
-    <li>
-        {{ convidado.nome }} - 
-        {% if convidado.confirmacao %}
-            {% if convidado.confirmacao.confirmado %}
-                ✅ Confirmado
-            {% else %}
-                ❌ Não Confirmado
-            {% endif %}
-        {% else %}
-            <a href="{% url 'rsvp' convidado.id %}">Confirmar Presença</a>
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
+{% block title %}Detalhes do Evento{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Detalhes do Evento: {{ evento.nome }}</h2>
+    <p><strong>Data:</strong> {{ evento.data }}</p>
+    <p><strong>Local:</strong> {{ evento.local }}</p>
+
+    <h3>Convidados:</h3>
+    <ul class="list-group">
+        {% for convidado in convidados %}
+            <li class="list-group-item">
+                {{ convidado.nome }} - {{ convidado.email }}
+                <a href="{% url 'rsvp' convidado.id %}" class="btn btn-sm btn-primary float-right">RSVP</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
