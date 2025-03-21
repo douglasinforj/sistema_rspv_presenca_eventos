@@ -1,0 +1,9 @@
+{% block content %}
+<h2>Confirme sua Presença</h2>
+<p>Olá, {{ convidado.nome }}! Confirme sua presença no evento.</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Enviar</button>
+</form>
+{% endblock %}
