@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Importar Convidados{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Importar Convidados</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-warning{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Escolha um arquivo CSV ou Excel:</label>
+            {{ form.file }}
+        </div>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+
+    <hr>
+    <h4>Formato do Arquivo CSV/Excel</h4>
+    <p>O arquivo deve conter as colunas: <strong>nome, cpf, email, evento_id</strong></p>
+    <pre>
+    nome;cpf;email;evento_id;
+    João Silva;12345678900;joao@email.com;1
+    Maria Souza;09876543211;maria@email.com;2
+    </pre>
+</div>
+{% endblock %}
