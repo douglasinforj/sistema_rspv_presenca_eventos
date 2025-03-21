@@ -1,0 +1,10 @@
+{% block content %}
+<h2>Eventos Disponíveis</h2>
+<ul>
+    {% for evento in eventos %}
+    <li>
+        <a href="{% url 'detalhes_evento' evento.id %}">{{ evento.nome }}</a> - {{ evento.data }}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
