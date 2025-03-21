@@ -6,5 +6,8 @@ def lista_eventos(request):
     eventos = Evento.objects.all()
     return render(request, 'evento/lista_eventos.html', {'eventos': eventos})
 
-
+def detalhes_eventos(request, evento_id):
+    evento = get_object_or_404(Evento, id=evento_id)
+    convidados = Convidado.objects.filter(evento=evento)
+    return render(request, 'evento/detalhes_evento.html', {'evento':evento, 'convidados': convidados})
 
