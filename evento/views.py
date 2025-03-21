@@ -5,6 +5,8 @@ from .forms import RSVPForm, ConvidadoForm, UploadFileForm
 import pandas as pd
 from django.contrib import messages
 
+from django.core.paginator import Paginator
+
 
 
 def home(request):
@@ -15,10 +17,30 @@ def lista_eventos(request):
     eventos = Evento.objects.all()
     return render(request, 'evento/lista_eventos.html', {'eventos': eventos})
 
+
 def detalhes_evento(request, evento_id):
     evento = get_object_or_404(Evento, id=evento_id)
+
+    # Busca por nome ou email ou cpf
+    query = request.GET.get('q')
     convidados = Convidado.objects.filter(evento=evento)
-    return render(request, 'evento/detalhes_evento.html', {'evento': evento, 'convidados': convidados})
+
+    if query:
+        convidados = convidados.filter(nome__icontains=query) | convidados.filter(email__icontains=query) | convidados.filter(cpf__icontains=query)
+
+    # Paginação (10 convidados por página)
+    paginator = Paginator(convidados, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'evento/detalhes_evento.html', {
+        'evento': evento, 
+        'convidados': page_obj, 
+        'query': query
+    })
+
+
+
 
 
 
