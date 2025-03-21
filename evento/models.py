@@ -15,6 +15,7 @@ class Convidado(models.Model):
     nome = models.CharField(max_length=255)
     cpf = models.CharField(blank=False, null=False, unique=True, max_length=11)
     email = models.CharField(blank=False, null=False, unique=True, max_length=50)
+    telefone = models.CharField(blank=True, null=True, max_length=11)
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
 
     def __str__(self):
