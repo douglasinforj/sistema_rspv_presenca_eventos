@@ -14,8 +14,13 @@ def home(request):
 
 
 def lista_eventos(request):
-    eventos = Evento.objects.all()
-    return render(request, 'evento/lista_eventos.html', {'eventos': eventos})
+    query = request.GET.get('q')
+    if query:
+        eventos = Evento.objects.filter(nome__icontains=query)
+    else:
+        eventos = Evento.objects.all()
+    
+    return render(request, 'lista_eventos.html', {'eventos': eventos, 'query': query})
 
 
 
