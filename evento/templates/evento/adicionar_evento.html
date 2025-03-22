@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Adicionar Evento{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-body">
+                    <h3 class="card-title text-center">Adicionar Evento</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_nome" class="form-label">Nome</label>
+                            {{ form.nome }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_descricao" class="form-label">Descrição</label>
+                            {{ form.descricao }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_data" class="form-label">Data</label>
+                            {{ form.data }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_local" class="form-label">Local</label>
+                            {{ form.local }}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Salvar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
