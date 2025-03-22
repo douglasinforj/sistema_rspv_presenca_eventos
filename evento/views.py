@@ -20,7 +20,7 @@ def lista_eventos(request):
     else:
         eventos = Evento.objects.all()
     
-    return render(request, 'lista_eventos.html', {'eventos': eventos, 'query': query})
+    return render(request, 'evento/lista_eventos.html', {'eventos': eventos, 'query': query})
 
 
 
