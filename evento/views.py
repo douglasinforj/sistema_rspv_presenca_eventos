@@ -43,7 +43,7 @@ def detalhes_evento(request, evento_id):
 
 
 
-
+# TODO: descontinuar este codigo, ficou meio sem sentido
 def rsvp(request, convidado_id):
     convidado = get_object_or_404(Convidado, id=convidado_id)
 
@@ -62,6 +62,71 @@ def rsvp(request, convidado_id):
         form = RSVPForm(instance=confirmacao)
 
     return render(request, 'evento/rsvp.html', {'form': form, 'convidado': convidado})
+
+
+"""
+Lista os convidados do evento.
+O atendente pode editar os dados e confirmar manualmente.
+Mostra um botão "Editar" ao lado do nome do convidado.
+
+"""
+def rsvp_atendente(request, convidado_id):
+    convidado = get_object_or_404(Convidado, id=convidado_id)
+    confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
+
+    if request.method == 'POST':
+        form = RSVPForm(request.POST, instance=confirmacao)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Confirmação atualizada com sucesso!")
+            return redirect('detalhes_evento', evento_id=convidado.evento.id)
+    else:
+        form = RSVPForm(instance=confirmacao)
+
+    return render(request, 'evento/rsvp_atendente.html', {'form': form, 'convidado': convidado})
+
+
+
+"""
+O convidado acessa um link e insere o CPF.
+Se o CPF existir, ele pode confirmar presença.
+Após confirmar, exibe uma mensagem de sucesso.
+"""
+
+def rsvp_convidado(request):
+    if request.method == 'POST':
+        cpf = request.POST.get('cpf')
+        try:
+            convidado = Convidado.objects.get(cpf=cpf)
+            confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
+
+            if request.POST.get('confirmar'):
+                confirmacao.confirmado = True
+                confirmacao.save()
+                messages.success(request, "Presença confirmada com sucesso!")
+                return redirect('rsvp_sucesso')
+        except Convidado.DoesNotExist:
+            messages.error(request, "CPF não encontrado. Verifique e tente novamente.")
+
+    return render(request, 'evento/rsvp_convidado.html')
+
+
+
+"""
+Após após confirmações dos convidados
+"""
+
+def rsvp_sucesso(request):
+    return render(request, 'evento/rsvp_sucesso.html')
+
+
+
+
+
+
+
+
+
 
 
 
