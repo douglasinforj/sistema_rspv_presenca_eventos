@@ -1,5 +1,5 @@
 from django import forms 
-from .models import Confirmacao, Convidado
+from .models import Confirmacao, Convidado, Evento
 
 class RSVPForm(forms.ModelForm):
     class Meta:
@@ -23,3 +23,17 @@ class ConvidadoForm(forms.ModelForm):
 
 class UploadFileForm(forms.Form):
     file = forms.FileField(label="Selecione um aqruivo CSV ou Excel")
+
+
+
+
+class EventoForm(forms.ModelForm):
+    class Meta:
+        model = Evento
+        fields = ['nome', 'descricao', 'data', 'local']
+        widgets = {
+            'nome': forms.TextInput(attrs={'class': 'form-control'}),
+            'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'data': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'local': forms.TextInput(attrs={'class': 'form-control'}),
+        }
