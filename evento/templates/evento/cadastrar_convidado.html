@@ -22,32 +22,34 @@
             <form method="POST">
                 {% csrf_token %}
                 
-                <div class="mb-3">
-                    <label for="id_nome" class="form-label">Nome</label>
-                    {{ form.nome }}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="id_nome" class="form-label fw-bold">Nome</label>
+                        {{ form.nome }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_cpf" class="form-label fw-bold">CPF</label>
+                        {{ form.cpf }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_email" class="form-label fw-bold">E-mail</label>
+                        {{ form.email}}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_telefone" class="form-label fw-bold">Telefone</label>
+                        {{ form.telefone }}
+                    </div>
+
+                    <div class="col-12">
+                        <label for="id_evento" class="form-label fw-bold">Evento</label>
+                        {{ form.evento }}
+                    </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="id_cpf" class="form-label">CPF</label>
-                    {{ form.cpf }}
-                </div>
-
-                <div class="mb-3">
-                    <label for="id_email" class="form-label">E-mail</label>
-                    {{ form.email }}
-                </div>
-
-                <div class="mb-3">
-                    <label for="id_telfone" class="form-label">Telefone</label>
-                    {{ form.telefone }}
-                </div>
-
-                <div class="mb-3">
-                    <label for="id_evento" class="form-label">Evento</label>
-                    {{ form.evento }}
-                </div>
-
-                <div class="d-grid">
+                <div class="d-grid mt-4">
                     <button type="submit" class="btn btn-success btn-lg">Salvar</button>
                 </div>
             </form>
@@ -55,4 +57,3 @@
     </div>
 </div>
 {% endblock %}
-
