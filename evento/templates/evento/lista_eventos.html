@@ -17,9 +17,7 @@
                 </div>
             </form>
 
-            <div class="text-center mb-4">
-                <a href="{% url 'adicionar_evento' %}" class="btn btn-success">Adicionar Evento</a>
-            </div>
+            
 
             <ul class="list-group list-group-flush">
                 {% for evento in eventos %}
@@ -33,6 +31,11 @@
                     <li class="list-group-item text-center text-muted">Nenhum evento encontrado.</li>
                 {% endfor %}
             </ul>
+            <br>
+            <br>
+            <div class="text-center mb-4">
+                <a href="{% url 'adicionar_evento' %}" class="btn btn-success">Adicionar Evento</a>
+            </div>
         </div>
     </div>
 </div>
