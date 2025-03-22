@@ -24,7 +24,7 @@
                 {% for convidado in convidados %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{ convidado.nome }} - {{ convidado.email }}
-                        <a href="{% url 'rsvp' convidado.id %}" class="btn btn-sm btn-primary">RSVP</a>
+                        <a href="{% url 'rsvp_atendente' convidado.id %}" class="btn btn-sm btn-primary">RSVP</a>
                     </li>
                 {% empty %}
                     <li class="list-group-item text-center">Nenhum convidado encontrado.</li>
