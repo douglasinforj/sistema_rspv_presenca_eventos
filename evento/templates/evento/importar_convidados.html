@@ -2,33 +2,50 @@
 {% block title %}Importar Convidados{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Importar Convidados</h2>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg mt-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Importar Convidados</h4>
+                </div>
+                <div class="card-body">
+                    
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-warning{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-danger{% else %}alert-warning{% endif %}">
-                {{ message }}
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="form-label"><strong>Escolha um arquivo CSV ou Excel:</strong></label>
+                            {{ form.file }}
+                        </div>
+                        <button type="submit" class="btn btn-success btn-block mt-3">📤 Enviar Arquivo</button>
+                    </form>
+
+                    <hr>
+
+                    <h5 class="mt-4">Formato do Arquivo CSV/Excel</h5>
+                    <p class="text-muted">O arquivo deve conter as colunas: <strong>nome, cpf, email, evento_id</strong></p>
+                    
+                    <div class="bg-light p-3 rounded border">
+                        <pre class="mb-0">
+                                nome;cpf;email;evento_id
+                                João Silva;12345678900;joao@email.com;1
+                                Maria Souza;09876543211;maria@email.com;2
+                        </pre>
+                    </div>
+
+                    <a href="{% url 'lista_eventos' %}" class="btn btn-secondary btn-block mt-3">🔙 Voltar para a lista</a>
+
+                </div>
             </div>
-        {% endfor %}
-    {% endif %}
-
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="mb-3">
-            <label class="form-label">Escolha um arquivo CSV ou Excel:</label>
-            {{ form.file }}
         </div>
-        <button type="submit" class="btn btn-primary">Enviar</button>
-    </form>
-
-    <hr>
-    <h4>Formato do Arquivo CSV/Excel</h4>
-    <p>O arquivo deve conter as colunas: <strong>nome, cpf, email, evento_id</strong></p>
-    <pre>
-    nome;cpf;email;evento_id;
-    João Silva;12345678900;joao@email.com;1
-    Maria Souza;09876543211;maria@email.com;2
-    </pre>
+    </div>
 </div>
 {% endblock %}
