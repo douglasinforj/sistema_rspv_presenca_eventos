@@ -5,6 +5,7 @@ class Evento(models.Model):
     descricao = models.TextField(blank=True)
     data = models.DateTimeField()
     local = models.CharField(max_length=255)
+    imagem = models.ImageField(upload_to='eventos/', blank=True, null=True)
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
