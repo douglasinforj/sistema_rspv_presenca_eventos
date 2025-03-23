@@ -9,7 +9,7 @@
             <div class="card shadow-lg">
                 <div class="card-body">
                     <h3 class="card-title text-center">Adicionar Evento</h3>
-                    <form method="POST">
+                    <form method="POST" enctype="multipart/form-data">  <!-- Adicionando enctype para suportar arquivos -->
                         {% csrf_token %}
                         <div class="mb-3">
                             <label for="id_nome" class="form-label">Nome</label>
@@ -26,6 +26,10 @@
                         <div class="mb-3">
                             <label for="id_local" class="form-label">Local</label>
                             {{ form.local }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_imagem" class="form-label">Imagem do Evento</label>
+                            {{ form.imagem }}
                         </div>
                         <button type="submit" class="btn btn-primary w-100">Salvar</button>
                     </form>

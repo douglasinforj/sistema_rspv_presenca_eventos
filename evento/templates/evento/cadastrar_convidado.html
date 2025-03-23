@@ -3,67 +3,66 @@
 {% block title %}Cadastrar Convidado{% endblock %}
 
 {% block content %}
-<div class="container d-flex justify-content-center align-items-center">
-    <div class="row w-100 px-3">
-        <div class="col-md-10 col-lg-6 mx-auto">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white text-center">
-                    <h4 class="mb-0">Cadastrar Novo Convidado</h4>
-                </div>
-                <div class="card-body">
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+            <h4 class="mb-0">Cadastrar Novo Convidado</h4>
+        </div>
+        <div class="card-body">
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert 
+                        {% if message.tags == 'success' %}alert-success
+                        {% elif message.tags == 'error' %}alert-danger
+                        {% else %}alert-warning{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <table class="table table-bordered">
                     
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert 
-                                {% if message.tags == 'success' %}alert-success
-                                {% elif message.tags == 'error' %}alert-danger
-                                {% else %}alert-warning{% endif %}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+                    <tbody>
+                        <tr>
+                            <td><label for="id_nome" class="form-label fw-bold">Nome</label></td>
+                            <td>{{ form.nome }}</td>
+                        </tr>
 
-                    <form method="POST">
-                        {% csrf_token %}
-                        
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="id_nome" class="form-label fw-bold">Nome</label>
-                                {{ form.nome }}
-                            </div>
+                        <tr>
+                            <td><label for="id_cpf" class="form-label fw-bold">CPF</label></td>
+                            <td>{{ form.cpf }}</td>
+                        </tr>
 
-                            <div class="col-md-6">
-                                <label for="id_cpf" class="form-label fw-bold">CPF</label>
-                                {{ form.cpf }}
-                            </div>
+                        <tr>
+                            <td><label for="id_email" class="form-label fw-bold">E-mail</label></td>
+                            <td>{{ form.email }}</td>
+                        </tr>
 
-                            <div class="col-md-6">
-                                <label for="id_email" class="form-label fw-bold">E-mail</label>
-                                {{ form.email }}
-                            </div>
+                        <tr>
+                            <td><label for="id_telefone" class="form-label fw-bold">Telefone</label></td>
+                            <td>{{ form.telefone }}</td>
+                        </tr>
 
-                            <div class="col-md-6">
-                                <label for="id_telefone" class="form-label fw-bold">Telefone</label>
-                                {{ form.telefone }}
-                            </div>
+                        <tr>
+                            <td><label for="id_evento" class="form-label fw-bold">Evento</label></td>
+                            <td>{{ form.evento }}</td>
+                        </tr>
+                    </tbody>
+                </table>
 
-                            <div class="col-12">
-                                <label for="id_evento" class="form-label fw-bold">Evento</label>
-                                {{ form.evento }}
-                            </div>
-                        </div>
-
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-success btn-lg">💾 Salvar</button>
-                        </div>
-
-                        <div class="text-center mt-3">
-                            <a href="#" class="btn btn-secondary">🔙 Voltar para a Lista</a>
-                        </div>
-                    </form>
-
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-success btn-lg">💾 Salvar</button>
                 </div>
-            </div>
+
+                <div class="text-center mt-3">
+                    <a href="{% url 'lista_eventos' %}" class="btn btn-secondary">🔙 Voltar para a Lista</a>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>

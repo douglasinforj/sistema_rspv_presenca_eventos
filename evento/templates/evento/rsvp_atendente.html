@@ -3,34 +3,70 @@
 {% block title %}Editar Confirmação{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg mt-4">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Editar Confirmação</h4>
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white text-center">
+            <h4 class="mb-0">Editar Confirmação</h4>
+        </div>
+        <div class="card-body">
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert 
+                        {% if message.tags == 'success' %}alert-success
+                        {% elif message.tags == 'error' %}alert-danger
+                        {% else %}alert-warning{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <p><strong>Convidado:</strong> {{ convidado.nome }}</p>
+
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="id_nome" class="form-label fw-bold">Nome: </label>
+                        {{ convidado.nome }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_nome" class="form-label fw-bold">CPF: </label>
+                        {{ convidado.cpf }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_email" class="form-label fw-bold">E-mail: </label>
+                        {{ convidado.email }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_telefone" class="form-label fw-bold">Telefone: </label>
+                        {{ convidado.telefone }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_evento" class="form-label fw-bold">Evento: </label>
+                        {{ convidado.evento }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="id_confirmado" class="form-label fw-bold">Confirmado: </label>
+                        {{ form.confirmado }}
+                    </div>
                 </div>
-                <div class="card-body">
-                    
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
 
-                    <p><strong>Convidado:</strong> {{ convidado.nome }}</p>
-
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            {{ form.as_p }}
-                        </div>
-                        <button type="submit" class="btn btn-success btn-block">Salvar</button>
-                    </form>
-
-                    <a href="{% url 'lista_eventos' %}" class="btn btn-secondary btn-block mt-2">Voltar para a lista</a>
+                <div class="d-grid mt-4">
+                    <button type="submit" class="btn btn-success btn-lg">Salvar</button>
                 </div>
-            </div>
+
+                <div class="text-center mt-3">
+                    <a href="{% url 'lista_eventos' %}" class="btn btn-secondary">🔙 Voltar para a Lista</a>
+                </div>
+            </form>
+
         </div>
     </div>
 </div>

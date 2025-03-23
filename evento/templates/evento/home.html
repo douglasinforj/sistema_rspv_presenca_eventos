@@ -1,19 +1,44 @@
 {% extends 'base.html' %}
 
-{% block title %}Lista de Eventos{% endblock %}
+{% load static %}
+
+{% block title %}Bem-vindo ao Sistema de Eventos{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h2>Lista de Eventos</h2>
-    <ul class="list-group">
-        {% for evento in eventos %}
-            <li class="list-group-item">
-                <a href="{% url 'detalhes_evento' evento.id %}">{{ evento.nome }}</a>
-            </li>
-        {% endfor %}
-    </ul>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg text-center p-4">
+                <h1 class="card-title">Bem-vindo ao Sistema RSPV de Eventos</h1>
+                <p class="card-text text-muted">Fique por dentro dos próximos eventos!</p>
+            </div>
+
+            {% if eventos %}
+            <div class="row mt-4">
+                {% for evento in eventos %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-lg">
+                        {% if evento.imagem and evento.imagem.url %}
+                            <img src="{{ evento.imagem.url }}" class="d-block w-100" alt="{{ evento.nome }}">
+                        {% else %}
+                            <img src="/static/image/default-event.png" class="d-block w-100" alt="Imagem padrão do evento">
+                        {% endif %}
+
+                        <div class="card-body text-center">
+                            <h5 class="card-title">{{ evento.nome }}</h5>
+                            <p class="card-text text-muted">{{ evento.data|date:"d/m/Y H:i" }}</p>
+                            <a href="{% url 'detalhes_evento' evento.id %}" class="btn btn-primary">Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center mt-4">
+                Nenhum evento disponível no momento.
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}
-
-
-
