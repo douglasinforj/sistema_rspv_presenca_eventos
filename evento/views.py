@@ -10,7 +10,8 @@ from django.core.paginator import Paginator
 
 
 def home(request):
-    return render(request, 'evento/home.html')
+    eventos = Evento.objects.all().order_by('-data')  # Carregar eventos ordenados por data
+    return render(request, 'evento/home.html', {'eventos': eventos})
 
 
 def lista_eventos(request):
@@ -26,7 +27,7 @@ def lista_eventos(request):
 
 def adicionar_evento(request):
     if request.method == "POST":
-        form = EventoForm(request.POST)
+        form = EventoForm(request.POST, request.FILES)   #adicionar imagem
         if form.is_valid():
             form.save()
             return redirect('lista_eventos') 
@@ -139,15 +140,6 @@ Após após confirmações dos convidados
 
 def rsvp_sucesso(request):
     return render(request, 'evento/rsvp_sucesso.html')
-
-
-
-
-
-
-
-
-
 
 
 
