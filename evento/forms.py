@@ -30,10 +30,15 @@ class UploadFileForm(forms.Form):
 class EventoForm(forms.ModelForm):
     class Meta:
         model = Evento
-        fields = ['nome', 'descricao', 'data', 'local']
+        fields = ['nome', 'descricao', 'data', 'local', 'imagem']  # Adicionando 'imagem'
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control'}),
             'descricao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'data': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'local': forms.TextInput(attrs={'class': 'form-control'}),
         }
+    
+    imagem = forms.ImageField(
+        required=False, 
+        widget=forms.ClearableFileInput(attrs={'class': 'form-control'})
+    )  # Adicionando o campo de upload
