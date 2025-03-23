@@ -2,6 +2,9 @@
 from pathlib import Path
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -10,7 +13,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-+%$!$!=h$6=d%*9(t*-80h_ks@l)7ccdy6kuhz9!-)1ylcgh@r'
+SECRET_KEY = os.getenv('SECRET_KEY', 'chave_de_fallback_super_secreta')
+
+if SECRET_KEY == 'chave_de_fallback_super_secreta':
+    print("⚠️ AVISO: SECRET_KEY não encontrada no .env!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -64,10 +70,26 @@ WSGI_APPLICATION = 'rsvp_evento.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+    }
+}
+"""
+#Banco de dados MYSQL
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '3306'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
