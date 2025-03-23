@@ -5,6 +5,8 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('eventos', views.lista_eventos, name='lista_eventos'),
+    path('adicionar/', views.adicionar_evento, name='adicionar_evento'),
+    
     path('evento/<int:evento_id>/', views.detalhes_evento, name='detalhes_evento'),
     
     #TODO: vai ser preciso retirar não vai fazer sentido
