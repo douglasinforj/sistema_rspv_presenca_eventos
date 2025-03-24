@@ -52,6 +52,7 @@ class Confirmacao(models.Model):
     convidado = models.OneToOneField(Convidado, on_delete=models.CASCADE, null=True, blank=True)
     confirmado = models.BooleanField(default=False)
     restricoes_alimentares = models.TextField(blank=True, null=True)
+    entrou = models.BooleanField(default=False)  #campo de check-in
     
 
     def __str__(self):
