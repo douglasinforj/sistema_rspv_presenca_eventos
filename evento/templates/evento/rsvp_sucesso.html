@@ -1,3 +1,31 @@
-<h2>Presença Confirmada!</h2>
-<p>Obrigado, sua presença foi confirmada com sucesso!</p>
-<a href="{% url 'home' %}">Voltar ao início</a>
+{% extends 'base_convidado.html' %}
+
+{% block title %}Presença Confirmada{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">Presença Confirmada!</h4>
+            </div>
+            
+            <p>Obrigado, sua presença foi confirmada com sucesso!</p>
+
+            <h5 class="mb-3">Dados do Convidado:</h5>
+            <p><strong>Nome:</strong> {{ convidado.nome }}</p>
+            <p><strong>Email:</strong> {{ convidado.email }}</p>
+            <p><strong>Telefone:</strong> {{ convidado.telefone }}</p>
+            <p><strong>Evento:</strong> {{ convidado.evento.nome }} - {{ convidado.evento.data|date:"d/m/Y H:i" }}</p>
+            
+            {% if qr_code %}
+                <h3>Seu QR Code:</h3>
+                <img src="{{ qr_code }}" alt="QR Code de Confirmação" style="width: 150px; height: 150px;">
+            {% endif %}
+            
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
+
