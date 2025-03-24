@@ -41,6 +41,11 @@ body {
                 <li class="nav-item"><a class="nav-link" href="{% url 'rsvp_convidado' %}">link Confirmar Convidados</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'checkin_view' %}">Valida QRCode</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'importar_convidados' %}">Importar Convidados</a></li>
+                <li class="nav-item">{% if user.is_authenticated %}
+                                        <a href="{% url 'logout' %}" class="btn btn-danger">🚪 Sair</a>
+                                    {% else %}
+                                        <a href="{% url 'login' %}" class="btn btn-primary">🔑 Login</a>
+                                    {% endif %}</li>
             </ul>
         </div>
     </nav>
