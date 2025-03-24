@@ -1,0 +1,50 @@
+{% extends 'base_convidado.html' %}
+
+{% block title %}Confirmação de Presença{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg">
+        <div class="card-body">
+            <div class="card-header bg-primary text-white text-center">
+                <h4 class="mb-0">Confirmação de Presença</h4>
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <p class="text-muted text-center">Digite seu CPF para confirmar a presença no evento.</p>
+
+            <!-- Formulário de Busca -->
+            <form method="post">
+                {% csrf_token %}
+                <div class="input-group mb-4">
+                    <input type="text" name="cpf" class="form-control" placeholder="Digite seu CPF" required>
+                    <button type="submit" name="buscar" class="btn btn-primary">Buscar</button>
+                </div>
+            </form>
+
+            {% if convidado %}
+            <div class="mt-4">
+                <h5 class="mb-3">Dados do Convidado</h5>
+                <p><strong>Nome:</strong> {{ convidado.nome }}</p>
+                <p><strong>Email:</strong> {{ convidado.email }}</p>
+                <p><strong>Telefone:</strong> {{ convidado.telefone }}</p>
+                <p><strong>Evento:</strong> {{ convidado.evento.nome }} - {{ convidado.evento.data|date:"d/m/Y H:i" }}</p>
+            
+            <!-- Formulário para Confirmar Presença -->
+                <form method="post">
+                    {% csrf_token %}
+                    <!-- Campo oculto com o CPF -->
+                    <input type="hidden" name="cpf" value="{{ convidado.cpf }}">
+                    <button type="submit" name="confirmar" class="btn btn-success">Confirmar Presença</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
