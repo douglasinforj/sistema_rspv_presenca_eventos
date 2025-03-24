@@ -259,3 +259,7 @@ def login_view(request):
     return render(request, "auth/login.html")
             
 
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Você saiu do sistema.")
+    return redirect("login")
