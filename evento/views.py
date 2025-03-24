@@ -7,6 +7,8 @@ from django.contrib import messages
 
 from django.core.paginator import Paginator
 
+from django.http import JsonResponse
+
 
 import qrcode
 import io
@@ -207,6 +209,31 @@ def rsvp_sucesso(request):
 
 
 
+def validar_qr_code(request):
+    qr_code = request.GET.get("qr_code")
+
+    try:
+        convidado = Convidado.objects.get(qr_code=qr_code)
+        confirmacao = Confirmacao.objects.get(convidado=convidado)
+
+        if not confirmacao.confirmado:
+            return JsonResponse({"status": "erro", "mensagem": "Convidado ainda não confirmou presença."}, status=400)
+        
+        # Realiza o check-in
+        confirmacao.entrou = True
+        confirmacao.save()
+
+        return JsonResponse({"status": "sucesso", "mensagem": "Check-in realizado com sucesso!"})
+
+
+    
+    except Convidado.DoesNotExist:
+        return JsonResponse({"status": "erro", "mensagem": "QR Code inválido."}, status=404)
+
+    except Confirmacao.DoesNotExist:
+        return JsonResponse({"status": "erro", "mensagem": "Confirmação não encontrada."}, status=404)
 
 
 
+def checkin_view(request):
+    return render(request, "evento/checkin_view.html")
