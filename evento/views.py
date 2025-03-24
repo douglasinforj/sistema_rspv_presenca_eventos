@@ -13,6 +13,11 @@ import io
 import base64
 from django.core.files.base import ContentFile
 
+import logging
+
+
+# Configuração do logger
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -161,13 +166,7 @@ Após confirmar, exibe uma mensagem de sucesso.
 view exibe os dados antes da confirmação e gera o QR Code após a confirmação.
 """
 
-def gerar_qr_code(convidado):
-    """ Gera um QR Code baseado no CPF do convidado e retorna a imagem em base64 """
-    qr = qrcode.make(f"Nome: {convidado.nome} | CPF: {convidado.cpf} | Evento: {convidado.evento.nome}")
-    buffer = io.BytesIO()
-    qr.save(buffer, format="PNG")
-    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
-    return qr_base64
+
 
 def rsvp_convidado(request):
     convidado = None
@@ -175,35 +174,40 @@ def rsvp_convidado(request):
     qr_code = None
 
     if request.method == 'POST':
-        cpf = request.POST.get('cpf', '').strip()
+        cpf = request.POST.get('cpf', '').strip()  # Agora o CPF será capturado da requisição POST
+        logger.debug(f"Recebido CPF: {cpf}")
 
         try:
             convidado = Convidado.objects.get(cpf=cpf)
+            logger.debug(f"Convidado encontrado: {convidado.nome}")
             confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
             
-            # Verifica se o botão de confirmar foi pressionado
             if 'confirmar' in request.POST:
+                logger.debug("Botão 'Confirmar' pressionado.")
+                
                 form = RSVPForm(request.POST, instance=confirmacao)
                 if form.is_valid():
                     confirmacao = form.save(commit=False)
-                    confirmacao.confirmado = True  # Marca como confirmado
-                    qr_code = gerar_qr_code(convidado)  # Gera o QR Code
-                    
-                    # Salva o QR Code no banco
-                    qr_image = io.BytesIO(base64.b64decode(qr_code))
-                    confirmacao.qr_code.save(f"qrcode_{convidado.cpf}.png", ContentFile(qr_image.getvalue()), save=True)
-
+                    confirmacao.confirmado = True
                     confirmacao.save()
                     
-                    return render(request, 'evento/rsvp_sucesso.html', {'convidado': convidado, 'qr_code': qr_code})
+                    logger.debug(f"Confirmação salva para: {convidado.nome}")
 
+                    qr_code = convidado.qrcode.url if convidado.qrcode else None
+                    logger.debug(f"QR Code gerado: {qr_code}")
+
+                    return render(request, 'evento/rsvp_sucesso.html', {'convidado': convidado, 'qr_code': qr_code})
+                else:
+                    logger.debug("Formulário não válido.")
             else:
-                form = RSVPForm(instance=confirmacao)
+                logger.debug("Formulário de confirmação não enviado.")
 
         except Convidado.DoesNotExist:
+            logger.error(f"Convidado com CPF {cpf} não encontrado.")
             return render(request, 'evento/rsvp_convidado.html', {'erro': 'CPF não encontrado'})
 
     return render(request, 'evento/rsvp_convidado.html', {'form': form, 'convidado': convidado})
+
 
 
 
