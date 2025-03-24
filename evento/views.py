@@ -24,12 +24,12 @@ import logging
 # Configuração do logger
 logger = logging.getLogger(__name__)
 
-
+@login_required
 def home(request):
     eventos = Evento.objects.all().order_by('-data')  # Carregar eventos ordenados por data
     return render(request, 'evento/home.html', {'eventos': eventos})
 
-
+@login_required
 def lista_eventos(request):
     query = request.GET.get('q')
     if query:
@@ -40,7 +40,7 @@ def lista_eventos(request):
     return render(request, 'evento/lista_eventos.html', {'eventos': eventos, 'query': query})
 
 
-
+@login_required
 def adicionar_evento(request):
     if request.method == "POST":
         form = EventoForm(request.POST, request.FILES)   #adicionar imagem
@@ -52,7 +52,7 @@ def adicionar_evento(request):
     
     return render(request, 'evento/adicionar_evento.html', {'form': form})
 
-
+@login_required
 def cadastrar_convidado(request):
     if request.method == 'POST':
         form = ConvidadoForm(request.POST)
@@ -71,6 +71,7 @@ def cadastrar_convidado(request):
 
     
 # Mostra os detalhes do evento e seu convidados associados
+@login_required
 def detalhes_evento(request, evento_id):
     evento = get_object_or_404(Evento, id=evento_id)
 
@@ -93,7 +94,7 @@ def detalhes_evento(request, evento_id):
     })
 
 # importação de dados de arquivos csv e excel:
-
+@login_required
 def importar_convidados(request):
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
@@ -143,7 +144,7 @@ def importar_convidados(request):
     
     return render(request, "evento/importar_convidados.html", {"form": form})
 
-
+@login_required
 def rsvp_atendente(request, convidado_id):
     convidado = get_object_or_404(Convidado, id=convidado_id)
     confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
