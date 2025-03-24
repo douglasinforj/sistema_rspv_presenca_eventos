@@ -138,12 +138,7 @@ def importar_convidados(request):
     
     return render(request, "evento/importar_convidados.html", {"form": form})
 
-"""
-Lista os convidados do evento.
-O atendente pode editar os dados e confirmar manualmente.
-Mostra um botão "Editar" ao lado do nome do convidado.
 
-"""
 def rsvp_atendente(request, convidado_id):
     convidado = get_object_or_404(Convidado, id=convidado_id)
     confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
@@ -158,14 +153,6 @@ def rsvp_atendente(request, convidado_id):
         form = RSVPForm(instance=confirmacao)
 
     return render(request, 'evento/rsvp_atendente.html', {'form': form, 'convidado': convidado})
-
-"""
-O convidado acessa um link e insere o CPF.
-Se o CPF existir, ele pode confirmar presença.
-Após confirmar, exibe uma mensagem de sucesso.
-view exibe os dados antes da confirmação e gera o QR Code após a confirmação.
-"""
-
 
 
 def rsvp_convidado(request):
