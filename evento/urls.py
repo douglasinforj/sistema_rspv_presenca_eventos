@@ -18,6 +18,8 @@ urlpatterns = [
     path("importar_convidados/", views.importar_convidados, name="importar_convidados"),
 
 
+    path("api/validar_qr_code/", views.validar_qr_code, name="validar_qr_code"),
+    path("checkin/", views.checkin_view, name="checkin_view"),
 
 
 ]
