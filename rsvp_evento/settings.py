@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'evento',
+    'django_extensions', #TODO:Teste https
 ]
 
 MIDDLEWARE = [
@@ -158,3 +159,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = reverse_lazy('login_view')  
 LOGIN_URL = reverse_lazy('login_view')  
+
+#TODO:forçar Https, Teste https
+SECURE_SSL_REDIRECT = True  # Redireciona automaticamente para HTTPS
+SECURE_HSTS_SECONDS = 3600  # Habilita HTTP Strict Transport Security por 1 hora
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Aplica HSTS a subdomínios
+SECURE_HSTS_PRELOAD = True  # Permite que seu site seja pré-carregado para HSTS
