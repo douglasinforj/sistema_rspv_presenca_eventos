@@ -41,8 +41,17 @@ confirmação de presença e controle de check-in no evento.
 ### Presença confirmada e Liberação QRCode
 ![Presença confirmada e Liberação QRCode](assets/link_convidado_3.png)
 
-### Prototipo Verificação de QRCode
-![Prototipo Verificação de QRCode](assets/link_verifica_qrcode.png)
+### Verificação de QRCode
+![ Verificação de QRCode](assets/validar_qrCode.png)
+
+### Analisando QRCode
+![Analisando QRCode](assets/validar_qrCode2.png)
+
+
+### Validando e gerando check-in no sistema
+![Validando e gerando check-in no sistema](assets/validar_qrCode3.png)
+
+
 
 
 ## Funcionalidades Principais
@@ -91,6 +100,7 @@ confirmação de presença e controle de check-in no evento.
 - **Pandas**: Manipulação de dados para importação via CSV/Excel.
 - **Bootstrap**: Estilização das páginas web.
 - **Django Authentication**: Gerenciamento de usuários e login.
+- **JavaScript**: Validação de QRcode.
 
 
 ## Instalação
