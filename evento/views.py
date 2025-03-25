@@ -253,7 +253,7 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            messages.success(request, "Login realizado com sucesso!")
+            #messages.success(request, "Login realizado com sucesso!")
             return redirect('home')
         else:
             messages.error(request, "Usuário ou senha inválidos.")
@@ -262,5 +262,5 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    messages.success(request, "Você saiu do sistema.")
-    return redirect("login")
+    #messages.success(request, "Você saiu do sistema.")
+    return redirect("login_view")
