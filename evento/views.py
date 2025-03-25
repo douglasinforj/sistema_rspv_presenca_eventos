@@ -20,6 +20,9 @@ from django.core.files.base import ContentFile
 
 import logging
 
+from django.views.decorators.csrf import csrf_exempt    #TODO:Teste desativa a verificação CSRF
+import json
+
 
 # Configuração do logger
 logger = logging.getLogger(__name__)
@@ -211,31 +214,41 @@ Após após confirmações dos convidados
 def rsvp_sucesso(request):
     return render(request, 'evento/rsvp_sucesso.html')
 
-
-
+#TODO teste desabilitando csrf
+@csrf_exempt
 def validar_qr_code(request):
-    qr_code = request.GET.get("qr_code")
+    if request.method != "POST":
+        return JsonResponse({"status": "error", "message": "Método não permitido"}, status=405)
 
     try:
-        convidado = Convidado.objects.get(qr_code=qr_code)
+        data = json.loads(request.body)
+        qr_code = data.get("qr_code")
+
+        if not qr_code:
+            return JsonResponse({"status": "error", "message": "QR Code não fornecido."}, status=400)
+
+        print(f"QR Code recebido: {qr_code}")  # Debugging
+
+        convidado = Convidado.objects.get(cpf=qr_code)
         confirmacao = Confirmacao.objects.get(convidado=convidado)
 
         if not confirmacao.confirmado:
-            return JsonResponse({"status": "erro", "mensagem": "Convidado ainda não confirmou presença."}, status=400)
-        
-        # Realiza o check-in
+            return JsonResponse({"status": "error", "message": "Convidado ainda não confirmou presença."}, status=400)
+
         confirmacao.entrou = True
         confirmacao.save()
 
-        return JsonResponse({"status": "sucesso", "mensagem": "Check-in realizado com sucesso!"})
+        return JsonResponse({"status": "success", "message": "Check-in realizado com sucesso!"})
 
-
-    
     except Convidado.DoesNotExist:
-        return JsonResponse({"status": "erro", "mensagem": "QR Code inválido."}, status=404)
+        return JsonResponse({"status": "error", "message": "QR Code inválido."}, status=404)
 
     except Confirmacao.DoesNotExist:
-        return JsonResponse({"status": "erro", "mensagem": "Confirmação não encontrada."}, status=404)
+        return JsonResponse({"status": "error", "message": "Confirmação não encontrada."}, status=404)
+
+
+
+
 
 
 
