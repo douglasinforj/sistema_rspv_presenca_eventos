@@ -131,10 +131,15 @@ def importar_convidados(request):
                             "evento": evento,
                         }
                     )
+                    
+                    # Se foi criado agora, gera o QR Code
                     if created:
+                        convidado.generate_qrcode()    #chamando a função antes de salva os dados para gerar qrcode
+                        convidado.save()               # Salva o QR Code no banco de dados
                         messages.success(request, f"Convidado {convidado.nome} importado com sucesso.")
                     else:
                         messages.warning(request, f"O convidado {convidado.nome} já existe.")
+                
                 except Evento.DoesNotExist:
                     messages.error(request, f"Evento ID {row['evento_id']} não encontrado.")
                 except Exception as e:
@@ -146,6 +151,7 @@ def importar_convidados(request):
         form = UploadFileForm()
     
     return render(request, "evento/importar_convidados.html", {"form": form})
+
 
 @login_required
 def rsvp_atendente(request, convidado_id):
