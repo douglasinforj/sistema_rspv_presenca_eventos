@@ -283,3 +283,22 @@ def logout_view(request):
     logout(request)
     #messages.success(request, "Você saiu do sistema.")
     return redirect("login_view")
+
+
+
+def relatorio_evento(request):
+    eventos = Evento.objects.all()
+    evento_selecionado = request.GET.get("evento")
+
+    convidados = Convidado.objects.filter(evento_id=evento_selecionado) if evento_selecionado else []
+    confirmados = Confirmacao.objects.filter(convidado__evento_id=evento_selecionado, confirmado=True).count() if evento_selecionado else 0
+    checkins = Confirmacao.objects.filter(convidado__evento_id=evento_selecionado, entrou=True).count() if evento_selecionado else 0
+
+    context = {
+        "eventos": eventos,
+        "convidados": convidados,
+        "confirmados": confirmados,
+        "checkins": checkins,
+        "evento_selecionado": evento_selecionado,
+    }
+    return render(request, "evento/relatorio_evento.html", context)
