@@ -21,13 +21,14 @@
             flex-direction: column;
             align-items: center;
             background: white;
-            padding: 20px;
+            padding: 10px;
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
         video {
             width: 100%;
-            max-width: 400px;
+            max-width: 350px;
             border-radius: 10px;
         }
         canvas {
@@ -45,14 +46,40 @@
             background-color: #007bff;
             color: white;
         }
-        #scan-button {
-            background-color: #28a745;
-            color: white;
-        }
         #retry-button {
             background-color: #dc3545;
             color: white;
             display: none;
+        }
+        #messages {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+            display: none;
+            width: 80%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .success {
+            background-color: #28a745;
+            color: white;
+        }
+        .error {
+            background-color: #dc3545;
+            color: white;
+        }
+        /* Estilizando a mira */
+        #focus-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            border: 3px solid red;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -60,17 +87,27 @@
     <h2>Escanear QR Code para Check-in</h2>
     <button id="open-camera">Abrir Câmera</button>
     <button id="back-button" onclick="window.location.href='/checkin/'">Voltar para Check-in</button>
-    
+
+    <div id="messages"></div> <!-- Área para exibir mensagens -->
+
     <div id="scanner-container">
         <video id="video" autoplay></video>
         <canvas id="canvas"></canvas>
+        <div id="focus-frame"></div> <!-- Moldura de foco -->
         <p id="status">Aguardando leitura...</p>
-        <button id="scan-button">Escanear QR Code</button>
         <button id="retry-button">Repetir Leitura</button>
     </div>
 
     <script>
         let videoStream = null;
+        let scanning = false;
+
+        function showMessage(message, type) {
+            const messageBox = document.getElementById("messages");
+            messageBox.innerHTML = message;
+            messageBox.className = type;
+            messageBox.style.display = "block";
+        }
 
         async function startCamera() {
             const scannerContainer = document.getElementById("scanner-container");
@@ -78,7 +115,7 @@
             const video = document.getElementById("video");
 
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                alert("Erro: Seu navegador não suporta acesso à câmera.");
+                showMessage("Erro: Seu navegador não suporta acesso à câmera.", "error");
                 return;
             }
 
@@ -89,8 +126,10 @@
                 video.srcObject = videoStream;
                 scannerContainer.style.display = "flex";
                 openCameraButton.style.display = "none";
+                scanning = true;
+                scanQRCode(); // Inicia a leitura automaticamente
             } catch (error) {
-                alert("Erro ao acessar a câmera: " + error.message);
+                showMessage("Erro ao acessar a câmera: " + error.message, "error");
             }
         }
 
@@ -99,9 +138,10 @@
             const canvas = document.getElementById("canvas");
             const ctx = canvas.getContext("2d");
             const status = document.getElementById("status");
-            const retryButton = document.getElementById("retry-button");
 
             function processFrame() {
+                if (!scanning) return;
+
                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                     canvas.width = video.videoWidth;
                     canvas.height = video.videoHeight;
@@ -110,6 +150,7 @@
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
 
                     if (code) {
+                        scanning = false; // Para a leitura para evitar múltiplas detecções
                         status.innerText = "QR Code detectado! Validando...";
                         video.pause();
                         validateQRCode(code.data);
@@ -128,16 +169,16 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.status === "success" || data.status === "sucesso") {  // Corrigido para aceitar "sucesso"
+                if (data.status === "success" || data.status === "sucesso") {
                     document.body.style.backgroundColor = "green";
-                    alert("Check-in confirmado!");
+                    showMessage("Check-in confirmado!", "success");
                 } else {
                     document.body.style.backgroundColor = "red";
-                    alert(data.message);  // Exibe a mensagem exata do erro
+                    showMessage(data.message, "error");
                     document.getElementById("retry-button").style.display = "block";
                 }
             })
-            .catch(error => console.error("Erro na validação:", error));
+            .catch(error => showMessage("Erro na validação: " + error, "error"));
         }
 
         function resetScanner() {
@@ -147,11 +188,13 @@
 
             status.innerText = "Aguardando leitura...";
             retryButton.style.display = "none";
+            document.body.style.backgroundColor = "#f4f4f4";
+            scanning = true;
             video.play();
+            scanQRCode();
         }
 
         document.getElementById("open-camera").addEventListener("click", startCamera);
-        document.getElementById("scan-button").addEventListener("click", scanQRCode);
         document.getElementById("retry-button").addEventListener("click", resetScanner);
     </script>
 </body>
