@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Evento, Convidado, Confirmacao
 from .forms import RSVPForm, ConvidadoForm, UploadFileForm, EventoForm
@@ -12,20 +13,20 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
-
 import qrcode
 import io
 import base64
 from django.core.files.base import ContentFile
 
-import logging
+#import logging
 
-from django.views.decorators.csrf import csrf_exempt    #TODO:Teste desativa a verificação CSRF
+from django.views.decorators.csrf import csrf_exempt, csrf_protect 
 import json
+from django.views.decorators.http import require_GET, require_POST
 
 
 # Configuração do logger
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 @login_required
 def home(request):
@@ -176,36 +177,24 @@ def rsvp_convidado(request):
     qr_code = None
 
     if request.method == 'POST':
-        cpf = request.POST.get('cpf', '').strip()  # Agora o CPF será capturado da requisição POST
-        logger.debug(f"Recebido CPF: {cpf}")
+        cpf = request.POST.get('cpf', '').strip()
 
         try:
             convidado = Convidado.objects.get(cpf=cpf)
-            logger.debug(f"Convidado encontrado: {convidado.nome}")
             confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
             
             if 'confirmar' in request.POST:
-                logger.debug("Botão 'Confirmar' pressionado.")
-                
                 form = RSVPForm(request.POST, instance=confirmacao)
                 if form.is_valid():
                     confirmacao = form.save(commit=False)
                     confirmacao.confirmado = True
                     confirmacao.save()
-                    
-                    logger.debug(f"Confirmação salva para: {convidado.nome}")
 
                     qr_code = convidado.qrcode.url if convidado.qrcode else None
-                    logger.debug(f"QR Code gerado: {qr_code}")
 
                     return render(request, 'evento/rsvp_sucesso.html', {'convidado': convidado, 'qr_code': qr_code})
-                else:
-                    logger.debug("Formulário não válido.")
-            else:
-                logger.debug("Formulário de confirmação não enviado.")
 
         except Convidado.DoesNotExist:
-            logger.error(f"Convidado com CPF {cpf} não encontrado.")
             return render(request, 'evento/rsvp_convidado.html', {'erro': 'CPF não encontrado'})
 
     return render(request, 'evento/rsvp_convidado.html', {'form': form, 'convidado': convidado})
@@ -220,37 +209,103 @@ Após após confirmações dos convidados
 def rsvp_sucesso(request):
     return render(request, 'evento/rsvp_sucesso.html')
 
-#TODO teste desabilitando csrf
-@csrf_exempt
-def validar_qr_code(request):
-    if request.method != "POST":
-        return JsonResponse({"status": "error", "message": "Método não permitido"}, status=405)
 
+#@csrf_exempt
+@require_POST
+@csrf_protect
+def validar_qr_code(request):
     try:
         data = json.loads(request.body)
-        qr_code = data.get("qr_code")
+        qr_code = data.get("qr_code", "").strip()
+        evento_id = data.get("evento_id", "").strip()
 
-        if not qr_code:
-            return JsonResponse({"status": "error", "message": "QR Code não fornecido."}, status=400)
+        # Validação básica
+        if not qr_code or not evento_id:
+            return JsonResponse({
+                "status": "error",
+                "message": "QR Code e ID do Evento são obrigatórios."
+            }, status=400)
 
-        print(f"QR Code recebido: {qr_code}")  # Debugging
+        # Verifica formato do QR Code
+        if "_" not in qr_code:
+            return JsonResponse({
+                "status": "error",
+                "message": "Formato inválido do QR Code. Deve ser CPF_ID_EVENTO."
+            }, status=400)
 
-        convidado = Convidado.objects.get(cpf=qr_code)
-        confirmacao = Confirmacao.objects.get(convidado=convidado)
+        # Separa CPF e ID do evento do QR Code
+        try:
+            cpf, qr_evento_id = qr_code.split("_")
+            if not cpf.isdigit() or len(cpf) != 11:
+                raise ValueError
+            if not qr_evento_id.isdigit():
+                raise ValueError
+        except ValueError:
+            return JsonResponse({
+                "status": "error",
+                "message": "Formato inválido do QR Code. CPF ou ID do evento incorretos."
+            }, status=400)
 
+        # Verifica se o ID do evento no QR corresponde ao evento selecionado
+        if int(qr_evento_id) != int(evento_id):
+            return JsonResponse({
+                "status": "error",
+                "message": "QR Code não pertence a este evento."
+            }, status=400)
+
+        # Busca o convidado
+        try:
+            convidado = Convidado.objects.get(cpf=cpf, evento_id=evento_id)
+            confirmacao = Confirmacao.objects.get(convidado=convidado)
+        except Convidado.DoesNotExist:
+            return JsonResponse({
+                "status": "error",
+                "message": "Convidado não encontrado para este evento."
+            }, status=404)
+        except Confirmacao.DoesNotExist:
+            return JsonResponse({
+                "status": "error",
+                "message": "Confirmação não encontrada para este convidado."
+            }, status=404)
+
+        # Verifica status da confirmação
         if not confirmacao.confirmado:
-            return JsonResponse({"status": "error", "message": "Convidado ainda não confirmou presença."}, status=400)
+            return JsonResponse({
+                "status": "error",
+                "message": "Convidado ainda não confirmou presença."
+            }, status=400)
 
+        if confirmacao.entrou:
+            return JsonResponse({
+                "status": "error",
+                "message": "Check-in já realizado anteriormente."
+            }, status=400)
+
+        # Realiza o check-in
         confirmacao.entrou = True
+        confirmacao.data_checkin = timezone.now()
         confirmacao.save()
 
-        return JsonResponse({"status": "success", "message": "Check-in realizado com sucesso!"})
+        return JsonResponse({
+            "status": "success",
+            "message": "Check-in realizado com sucesso!",
+            "convidado": {
+                "nome": convidado.nome,
+                "cpf": convidado.cpf,
+                "evento": convidado.evento.nome
+            }
+        })
 
-    except Convidado.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "QR Code inválido."}, status=404)
-
-    except Confirmacao.DoesNotExist:
-        return JsonResponse({"status": "error", "message": "Confirmação não encontrada."}, status=404)
+    except json.JSONDecodeError:
+        return JsonResponse({
+            "status": "error",
+            "message": "Erro ao decodificar JSON."
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            "status": "error",
+            "message": f"Erro inesperado: {str(e)}"
+        }, status=500)
 
 
 
@@ -259,7 +314,8 @@ def validar_qr_code(request):
 
 
 def checkin_view(request):
-    return render(request, "evento/checkin_view.html")
+    eventos = Evento.objects.all()  # Busca todos os eventos
+    return render(request, "evento/checkin_view.html", {"eventos": eventos})
 
 
 
