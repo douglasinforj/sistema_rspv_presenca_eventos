@@ -24,6 +24,8 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 import json
 from django.views.decorators.http import require_GET, require_POST
 
+from django.db.models import Q
+
 
 # Configuração do logger
 #logger = logging.getLogger(__name__)
@@ -81,10 +83,14 @@ def detalhes_evento(request, evento_id):
 
     # Busca por nome ou email ou cpf
     query = request.GET.get('q')
-    convidados = Convidado.objects.filter(evento=evento)
+    convidados = Convidado.objects.filter(evento=evento).select_related('confirmacao')
 
     if query:
-        convidados = convidados.filter(nome__icontains=query) | convidados.filter(email__icontains=query) | convidados.filter(cpf__icontains=query)
+        convidados = convidados.filter(
+            Q(nome__icontains=query) | 
+            Q(email__icontains=query) | 
+            Q(cpf__icontains=query)
+        )
 
     # Paginação (10 convidados por página)
     paginator = Paginator(convidados, 10)
@@ -96,6 +102,22 @@ def detalhes_evento(request, evento_id):
         'convidados': page_obj, 
         'query': query
     })
+
+@login_required
+def marcar_checkin(request, convidado_id):
+    convidado = get_object_or_404(Convidado, id=convidado_id)
+    confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
+    
+    # Alternar o status de check-in
+    confirmacao.entrou = not confirmacao.entrou
+    confirmacao.save()
+    
+    messages.success(request, f'Check-in de {convidado.nome} atualizado com sucesso!')
+    return redirect('detalhes_evento', evento_id=convidado.evento.id)
+
+
+
+
 
 # importação de dados de arquivos csv e excel:
 @login_required
