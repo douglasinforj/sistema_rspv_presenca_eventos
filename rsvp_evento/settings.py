@@ -47,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'requestlogs.middleware.RequestLogsMiddleware',
 ]
 
 ROOT_URLCONF = 'rsvp_evento.urls'
@@ -165,3 +166,91 @@ SECURE_SSL_REDIRECT = True  # Redireciona automaticamente para HTTPS
 SECURE_HSTS_SECONDS = 3600  # Habilita HTTP Strict Transport Security por 1 hora
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Aplica HSTS a subdomínios
 SECURE_HSTS_PRELOAD = True  # Permite que seu site seja pré-carregado para HSTS
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER' :  'requestlogs.views.exception_handler' ,
+}
+
+
+#------------------------------Logs-----------------------------------------
+
+import logging
+
+# Configuração de logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/django.log'),
+            'maxBytes': 1024*1024*5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose'
+        },
+        'request_file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/requests.log'),
+            'maxBytes': 1024*1024*5,  # 5 MB
+            'backupCount': 5,
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['request_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'evento': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+        },
+        'requestlogs': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+        },
+    },
+}
+
+# Cria o diretório de logs se não existir
+log_dir = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
+
+REQUESTLOGS = {
+    'STORAGE_CLASS': 'requestlogs.storages.LoggingStorage',
+    'ENTRY_CLASS': 'requestlogs.entries.RequestLogEntry',
+    'SERIALIZER_CLASS': 'requestlogs.storages.BaseEntrySerializer',
+    'SECRETS': ['password', 'token', 'auth', 'secret'],
+    'ATTRIBUTE_NAME': '_requestlog',
+    'METHODS': ('GET', 'POST', 'PUT', 'PATCH', 'DELETE'),
+    'REQUEST_BODY_LENGTH': 500,                                        # Limite para logar o corpo da requisição
+    'RESPONSE_BODY_LENGTH': 500,                                       # Limite para logar o corpo da resposta
+    'IGNORE_PATHS': ['/healthz', '/readiness'],
+    'IGNORE_USER_AGENTS': [],
+    'IGNORE_IP': [],
+    'MASK_HEADERS': ['Authorization', 'HTTP_AUTHORIZATION'],
+}
