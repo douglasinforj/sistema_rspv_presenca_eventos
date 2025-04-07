@@ -130,6 +130,7 @@ DB_USER=seu_usuario
 DB_PASSWORD=sua_senha
 DB_HOST=localhost
 DB_PORT=3306
+SECRET_KEY = 'sua_secret_key'
 ```
 
 ### 5 - Aplicar migrações e criar superusuário
