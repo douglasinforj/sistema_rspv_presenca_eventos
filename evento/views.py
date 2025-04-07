@@ -91,7 +91,7 @@ def detalhes_evento(request, evento_id):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
-    return render(request, 'evento/detalhes_evento.html', {gi 
+    return render(request, 'evento/detalhes_evento.html', {
         'evento': evento, 
         'convidados': page_obj, 
         'query': query
