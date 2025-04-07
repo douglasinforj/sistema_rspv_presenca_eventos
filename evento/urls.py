@@ -12,6 +12,7 @@ urlpatterns = [
     path('rsvp/convidado/', views.rsvp_convidado, name='rsvp_convidado'),
     path('rsvp/atendente/<int:convidado_id>/', views.rsvp_atendente, name='rsvp_atendente'),
     path('rsvp/sucesso/', views.rsvp_sucesso, name='rsvp_sucesso'),
+    path('rsvp/convidado/<int:convidado_id>/checkin/', views.marcar_checkin, name='marcar_checkin'),
 
     #TODO:path('rsvp/<int:convidado_id>/', views.rsvp, name='rsvp'),
     path('cadastrar_convidado/', views.cadastrar_convidado, name='cadastrar_convidado'),
