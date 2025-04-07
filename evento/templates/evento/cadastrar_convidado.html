@@ -10,6 +10,7 @@
         </div>
         <div class="card-body">
 
+            {% comment %}
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert 
@@ -20,6 +21,7 @@
                     </div>
                 {% endfor %}
             {% endif %}
+            {% endcomment %}
 
             <form method="POST">
                 {% csrf_token %}
