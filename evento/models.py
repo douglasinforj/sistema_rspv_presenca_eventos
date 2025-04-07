@@ -19,31 +19,34 @@ class Evento(models.Model):
 
 class Convidado(models.Model):
     nome = models.CharField(max_length=255)
-    cpf = models.CharField(blank=False, null=False, unique=True, max_length=11)
-    email = models.CharField(blank=False, null=False, unique=True, max_length=50)
-    telefone = models.CharField(blank=True, null=True, max_length=11)
+    cpf = models.CharField(max_length=11)
+    email = models.EmailField(unique=True, max_length=50)
+    telefone = models.CharField(blank=True, null=True, max_length=15)
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
     qrcode = models.ImageField(upload_to='convidados_qrcodes/', null=True, blank=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['cpf', 'evento'], name='unique_cpf_evento')
+        ]
+
     def __str__(self):
         return f"{self.nome} ({self.email})"
-    
-    def generate_qrcode(self):
-        # Gerar QR Code com base no CPF
-        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_L, box_size=10, border=4)
-        qr.add_data(self.cpf)
-        qr.make(fit=True)
 
-        # Criar a imagem do QR Code
-        img = qr.make_image(fill='black', back_color='white')
+    def generate_qrcode(self, force_update=False):
+        """Gera o QR Code baseado no CPF e ID do Evento."""
+        if self.qrcode and not force_update:
+            return                                # Evita reprocessamento se já existir
 
-        # Salvar imagem em formato de arquivo
+        qr_data = f"{self.cpf}_{self.evento.id}"  # Inclui ID do evento para diferenciação
+        qr = qrcode.make(qr_data)                 # Gera QR Code
+
         qr_file = BytesIO()
-        img.save(qr_file, 'PNG')
-        qr_file.seek(0)
+        qr.save(qr_file, format='PNG')
 
-        # Salvar a imagem no campo ImageField
-        self.qrcode.save(f"{self.cpf}_qrcode.png", ContentFile(qr_file.read()), save=False)
+        # Nome do arquivo inclui CPF e ID do evento para evitar duplicidade
+        file_name = f"{self.cpf}_{self.evento.id}.png"
+        self.qrcode.save(file_name, ContentFile(qr_file.getvalue()), save=True)
         qr_file.close()
     
 
