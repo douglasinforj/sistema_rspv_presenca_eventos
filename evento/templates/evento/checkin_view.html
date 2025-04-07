@@ -82,11 +82,21 @@
             border-radius: 10px;
         }
     </style>
+
+        <meta name="csrf-token" content="{{ csrf_token }}">
+
 </head>
 <body>
     <h2>Escanear QR Code para Check-in</h2>
+    <h2>Selecione o Evento</h2>
+    <select id="evento-selecionado">
+        <option value="">Selecione um evento</option>
+        {% for evento in eventos %}
+            <option value="{{ evento.id }}">{{ evento.nome }}</option>
+        {% endfor %}
+    </select>
     <button id="open-camera">Abrir Câmera</button>
-    <button id="back-button" onclick="window.location.href='/checkin/'">Voltar para Check-in</button>
+    <button id="back-button" class="button-secondary" onclick="window.location.href='/'">Voltar</button>
 
     <div id="messages"></div> <!-- Área para exibir mensagens -->
 
@@ -161,24 +171,52 @@
             requestAnimationFrame(processFrame);
         }
 
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+
         function validateQRCode(qrData) {
+            const eventoIdElement = document.getElementById("evento-selecionado");
+            if (!eventoIdElement || !eventoIdElement.value) {
+                showMessage("Por favor, selecione um evento.", "error");
+                return;
+            }
+            const eventoId = eventoIdElement.value;
+
+            // Mostra loading
+            const status = document.getElementById("status");
+            status.innerText = "Validando QR Code...";
+
             fetch("/api/validar_qr_code/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ qr_code: qrData })
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCSRFToken()
+                },
+                body: JSON.stringify({ qr_code: qrData, evento_id: eventoId })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.message || "Erro na requisição");
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
-                if (data.status === "success" || data.status === "sucesso") {
-                    document.body.style.backgroundColor = "green";
-                    showMessage("Check-in confirmado!", "success");
+                if (data.status === "success") {
+                    showMessage(`Check-in confirmado para ${data.convidado.nome} (${data.convidado.cpf})`, "success");
+                    // Reinicia scanner após 5 segundos
+                    setTimeout(resetScanner, 5000);
                 } else {
-                    document.body.style.backgroundColor = "red";
                     showMessage(data.message, "error");
                     document.getElementById("retry-button").style.display = "block";
                 }
             })
-            .catch(error => showMessage("Erro na validação: " + error, "error"));
+            .catch(error => {
+                showMessage(error.message, "error");
+                document.getElementById("retry-button").style.display = "block";
+            });
         }
 
         function resetScanner() {
