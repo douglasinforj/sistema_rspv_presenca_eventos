@@ -42,15 +42,16 @@ confirmação de presença e controle de check-in no evento.
 ![Presença confirmada e Liberação QRCode](assets/link_convidado_3.png)
 
 ### Verificação de QRCode
-![ Verificação de QRCode](assets/validar_qrCode.png)
+![ Verificação de QRCode](assets/validar_qrCode.jpeg)
 
 ### Analisando QRCode
-![Analisando QRCode](assets/validar_qrCode2.png)
+![Analisando QRCode](assets/validar_qrCode2.jpeg)
 
+### Analisando QRCode
+![Analisando QRCode](assets/validar_qrCode3.jpeg)
 
-### Validando e gerando check-in no sistema
-![Validando e gerando check-in no sistema](assets/validar_qrCode3.png)
-
+### Analisando QRCode
+![Analisando QRCode](assets/validar_qrCode4.jpeg)
 
 
 
