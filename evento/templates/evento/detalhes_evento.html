@@ -9,24 +9,14 @@
             <div class="card-header bg-primary text-white text-center">
                 <h4 class="mb-0">Detalhes do Evento e Participantes</h4>
             </div>
-            <p><strong>Nome:</strong> {{ evento.nome }}</p>
-            <p><strong>Data:</strong> {{ evento.data|date:"d/m/Y H:i" }}</p>
-            <p><strong>Local:</strong> {{ evento.local }}</p>
-
-            <!-- Campo de busca -->
-            <form method="GET" class="mb-4">
-                <div class="input-group">
-                    <input type="text" name="q" class="form-control" placeholder="Buscar convidado por nome ou email..." value="{{ query|default_if_none:'' }}">
-                    <button type="submit" class="btn btn-primary">Buscar</button>
-                </div>
-            </form>
-
-            <h4 class="mt-3">Lista de Convidados</h4>
+            <!-- ... (código existente) ... -->
+            
             <table class="table table-striped table-bordered">
                 <thead class="thead-dark">
                     <tr>
                         <th scope="col">Nome</th>
                         <th scope="col">Email</th>
+                        <th scope="col">Convite Enviado</th>
                         <th scope="col">Confirmado</th>
                         <th scope="col">Check-in</th>
                         <th scope="col">QRCode</th>
@@ -38,6 +28,13 @@
                     <tr>
                         <td>{{ convidado.nome }}</td>
                         <td>{{ convidado.email }}</td>
+                        <td>
+                            {% if convidado.convite_enviado %}
+                                <span class="badge bg-success">Enviado em {{ convidado.data_envio_convite|date:"d/m/Y H:i" }}</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pendente</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if convidado.confirmacao %}
                                 {% if convidado.confirmacao.confirmado %}
@@ -61,87 +58,55 @@
                             {% endif %}
                         </td>
                         <td>
-                            <!-- Caso não tenha QR code no cadastro, evita quebrar o sistema -->
-                            <div class="mt-4 text-center">
-                                {% if convidado.qrcode %}
-                                    <!-- Miniatura do QR Code -->
-                                    <a href="#" data-bs-toggle="modal" data-bs-target="#modalQrCode{{ convidado.id }}">
-                                        <img src="{{ convidado.qrcode.url }}" alt="QR Code do Convidado" style="width: 50px; height: 50px; object-fit: contain;" />
-                                    </a>
-                
-                                    <!-- Modal para exibir QR Code grande -->
-                                    <div class="modal fade" id="modalQrCode{{ convidado.id }}" tabindex="-1" aria-labelledby="modalQrCodeLabel{{ convidado.id }}" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered">
-                                            <div class="modal-content">
-                                                <div class="modal-header">
-                                                    <h5 class="modal-title" id="modalQrCodeLabel{{ convidado.id }}">QR Code do Convidado</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                </div>
-                                                <div class="modal-body text-center">
-                                                    <img src="{{ convidado.qrcode.url }}" alt="QR Code do Convidado" style="width: 300px; height: 300px; object-fit: contain;" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    <p>QR Code não disponível</p>
-                                {% endif %}
-                            </div>
+                            <!-- Código existente do QR Code -->
                         </td>
                         <td>
-                            <a href="{% url 'rsvp_atendente' convidado.id %}" class="btn btn-sm btn-primary">RSVP</a>
-                            {% if convidado.confirmacao %}
-                                <form method="post" action="{% url 'marcar_checkin' convidado.id %}" style="display: inline;">
+                            <div class="d-flex flex-column gap-1">
+                                <a href="{% url 'rsvp_atendente' convidado.id %}" class="btn btn-sm btn-primary">RSVP</a>
+                                
+                                <!-- Botão de enviar convite -->
+                                <form method="post" action="{% url 'detalhes_evento' evento.id %}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-sm {% if convidado.confirmacao.entrou %}btn-outline-success{% else %}btn-success{% endif %} mt-1">
-                                        {% if convidado.confirmacao.entrou %}
-                                            Desfazer Check-in
+                                    <input type="hidden" name="convidado_id" value="{{ convidado.id }}">
+                                    <button type="submit" name="enviar_convite" class="btn btn-sm {% if convidado.convite_enviado %}btn-outline-success{% else %}btn-success{% endif %} w-100">
+                                        {% if convidado.convite_enviado %}
+                                            <i class="bi bi-check-circle"></i> Convite Enviado
                                         {% else %}
-                                            Marcar Check-in
+                                            <i class="bi bi-envelope"></i> Enviar Convite
                                         {% endif %}
                                     </button>
                                 </form>
-                            {% endif %}
+                                
+                                {% if convidado.confirmacao %}
+                                    <form method="post" action="{% url 'marcar_checkin' convidado.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm {% if convidado.confirmacao.entrou %}btn-outline-success{% else %}btn-success{% endif %} w-100">
+                                            {% if convidado.confirmacao.entrou %}
+                                                <i class="bi bi-x-circle"></i> Desfazer Check-in
+                                            {% else %}
+                                                <i class="bi bi-check-circle"></i> Marcar Check-in
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center text-muted">Nenhum convidado encontrado.</td>
+                        <td colspan="7" class="text-center text-muted">Nenhum convidado encontrado.</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
-            {% if convidados.has_other_pages %}
-                <nav aria-label="Paginação">
-                    <ul class="pagination justify-content-center mt-3">
-                        {% if convidados.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}">« Primeira</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ convidados.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">‹ Anterior</a>
-                            </li>
-                        {% endif %}
-
-                        <li class="page-item disabled">
-                            <span class="page-link">Página {{ convidados.number }} de {{ convidados.paginator.num_pages }}</span>
-                        </li>
-
-                        {% if convidados.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ convidados.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Próxima ›</a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ convidados.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}">Última »</a>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            {% endif %}
+            
+            <!-- ... (código existente de paginação) ... -->
         </div>
     </div>
 </div>
+
+<!-- Adicione os ícones do Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
 
 <!-- Link para o CSS do Bootstrap -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
