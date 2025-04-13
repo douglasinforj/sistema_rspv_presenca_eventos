@@ -18,6 +18,16 @@ import io
 import base64
 from django.core.files.base import ContentFile
 
+
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from .utils import generate_token
+import datetime
+from rsvp_evento import settings
+
+
+
 #import logging
 
 from django.views.decorators.csrf import csrf_exempt, csrf_protect 
@@ -92,6 +102,42 @@ def detalhes_evento(request, evento_id):
             Q(cpf__icontains=query)
         )
 
+    # Ação de enviar convite
+    if request.method == 'POST' and 'enviar_convite' in request.POST:
+        convidado_id = request.POST.get('convidado_id')
+        convidado = get_object_or_404(Convidado, id=convidado_id, evento=evento)
+        
+        # Gerar token único para o convidado
+        token = generate_token(convidado.email)
+        
+        # Renderizar template de email
+        subject = f"Convite para o evento {evento.nome}"
+        html_message = render_to_string('evento/convite_evento.html', {
+            'evento': evento,
+            'convidado': convidado,
+            'token': token,
+        })
+        plain_message = strip_tags(html_message)
+        
+        try:
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [convidado.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            # Atualizar status do convidado
+            convidado.convite_enviado = True
+            convidado.data_envio_convite = datetime.datetime.now()
+            convidado.save()
+            messages.success(request, f'Convite enviado com sucesso para {convidado.email}')
+        except Exception as e:
+            messages.error(request, f'Erro ao enviar email: {str(e)}')
+        
+        return redirect('detalhes_evento', evento_id=evento.id)
+
     # Paginação (10 convidados por página)
     paginator = Paginator(convidados, 10)
     page_number = request.GET.get('page')
@@ -102,6 +148,9 @@ def detalhes_evento(request, evento_id):
         'convidados': page_obj, 
         'query': query
     })
+
+
+
 
 @login_required
 def marcar_checkin(request, convidado_id):
