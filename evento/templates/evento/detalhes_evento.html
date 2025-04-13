@@ -58,7 +58,35 @@
                             {% endif %}
                         </td>
                         <td>
-                            <!-- Código existente do QR Code -->
+
+                            <!-- Mostra QRCode - Caso não tenha QR code no cadastro, evita quebrar o sistema -->
+                            <div class="mt-4 text-center">
+                                {% if convidado.qrcode %}
+                                    <!-- Miniatura do QR Code -->
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#modalQrCode{{ convidado.id }}">
+                                        <img src="{{ convidado.qrcode.url }}" alt="QR Code do Convidado" style="width: 50px; height: 50px; object-fit: contain;" />
+                                    </a>
+                
+                                    <!-- Modal para exibir QR Code grande -->
+                                    <div class="modal fade" id="modalQrCode{{ convidado.id }}" tabindex="-1" aria-labelledby="modalQrCodeLabel{{ convidado.id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="modalQrCodeLabel{{ convidado.id }}">QR Code do Convidado</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                    <img src="{{ convidado.qrcode.url }}" alt="QR Code do Convidado" style="width: 300px; height: 300px; object-fit: contain;" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <p>QR Code não disponível</p>
+                                {% endif %}
+                            </div>
+
+
                         </td>
                         <td>
                             <div class="d-flex flex-column gap-1">
