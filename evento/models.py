@@ -25,6 +25,9 @@ class Convidado(models.Model):
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
     qrcode = models.ImageField(upload_to='convidados_qrcodes/', null=True, blank=True)
 
+    convite_enviado = models.BooleanField(default=False)
+    data_envio_convite = models.DateTimeField(null=True, blank=True)
+
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['cpf', 'evento'], name='unique_cpf_evento')
