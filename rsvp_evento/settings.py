@@ -254,3 +254,17 @@ REQUESTLOGS = {
     'IGNORE_IP': [],
     'MASK_HEADERS': ['Authorization', 'HTTP_AUTHORIZATION'],
 }
+
+
+
+#-------------------Configurando envio de email----------------------------
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.hostinger.com'
+EMAIL_PORT = 465
+EMAIL_USE_SSL = True                              # Usando SSL na porta 465
+EMAIL_USE_TLS = False                             # TLS é usado na porta 587, então mantenha False aqui
+
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')  
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
