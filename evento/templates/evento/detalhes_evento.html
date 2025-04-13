@@ -10,6 +10,19 @@
                 <h4 class="mb-0">Detalhes do Evento e Participantes</h4>
             </div>
             <!-- ... (código existente) ... -->
+            <p><strong>Nome:</strong> {{ evento.nome }}</p>
+            <p><strong>Data:</strong> {{ evento.data|date:"d/m/Y H:i" }}</p>
+            <p><strong>Local:</strong> {{ evento.local }}</p>
+
+            <!-- Campo de busca -->
+            <form method="GET" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="Buscar convidado por nome ou email..." value="{{ query|default_if_none:'' }}">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </div>
+            </form>
+
+            <h4 class="mt-3">Lista de Convidados</h4>
             
             <table class="table table-striped table-bordered">
                 <thead class="thead-dark">
