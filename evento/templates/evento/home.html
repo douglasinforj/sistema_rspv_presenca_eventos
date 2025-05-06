@@ -14,7 +14,7 @@
             </div>
 
             {% if eventos %}
-            <div class="row mt-4">
+            <div class="row mt-4 {% if eventos|length == 1 %}justify-content-center{% endif %}">
                 {% for evento in eventos %}
                 <div class="col-md-4 mb-4">
                     <div class="card shadow-lg">
