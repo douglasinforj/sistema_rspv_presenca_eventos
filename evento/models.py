@@ -20,7 +20,7 @@ class Evento(models.Model):
 class Convidado(models.Model):
     nome = models.CharField(max_length=255)
     cpf = models.CharField(max_length=11)
-    email = models.EmailField(unique=True, max_length=50)
+    email = models.EmailField(max_length=50)
     telefone = models.CharField(blank=True, null=True, max_length=15)
     evento = models.ForeignKey(Evento, on_delete=models.CASCADE)
     qrcode = models.ImageField(upload_to='convidados_qrcodes/', null=True, blank=True)
