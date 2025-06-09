@@ -4,7 +4,7 @@ from .models import Confirmacao, Convidado, Evento
 class RSVPForm(forms.ModelForm):
     class Meta:
         model = Confirmacao
-        fields = ['confirmado', 'restricoes_alimentares']
+        fields = ['confirmado']
 
 
 class ConvidadoForm(forms.ModelForm):
