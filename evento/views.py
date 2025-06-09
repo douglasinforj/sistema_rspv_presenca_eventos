@@ -26,9 +26,11 @@ from .utils import generate_token
 import datetime
 from rsvp_evento import settings
 
+from django.db import transaction
+from django.db import IntegrityError
 
 
-#import logging
+import logging
 
 from django.views.decorators.csrf import csrf_exempt, csrf_protect 
 import json
@@ -38,7 +40,7 @@ from django.db.models import Q
 
 
 # Configuração do logger
-#logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 @login_required
 def home(request):
@@ -73,14 +75,46 @@ def cadastrar_convidado(request):
     if request.method == 'POST':
         form = ConvidadoForm(request.POST)
         if form.is_valid():
-            convidado = form.save(commit=False)  # Não salva ainda
-            convidado.save()  # Salva o convidado no banco de dados
+            nome = form.cleaned_data['nome']
+            cpf = form.cleaned_data['cpf']
+            email = form.cleaned_data['email']
+            telefone = form.cleaned_data['telefone']
+            eventos = form.cleaned_data['eventos']
 
-            # Gera o QR Code para o convidado
-            convidado.generate_qrcode()
-            convidado.save()  # Salva o QR Code no banco
+            logger.debug(f"Eventos selecionados: {[evento.nome for evento in eventos]}")
 
-            return redirect('lista_eventos')  # Redireciona para a lista de eventos
+            try:
+                with transaction.atomic():
+                    eventos_conflitantes = []
+                    for evento in eventos:
+                        if Convidado.objects.filter(cpf=cpf, evento=evento).exists():
+                            eventos_conflitantes.append(evento.nome)
+                        else:
+                            logger.debug(f"Processando evento: {evento.nome}")
+                            convidado = Convidado(
+                                nome=nome,
+                                cpf=cpf,
+                                email=email,
+                                telefone=telefone,
+                                evento=evento
+                            )
+                            convidado.generate_qrcode()
+                            convidado.save()
+                            logger.debug(f"Convidado salvo para evento: {evento.nome}")
+                    if eventos_conflitantes:
+                        raise IntegrityError(f'CPF já cadastrado nos eventos: {", ".join(eventos_conflitantes)}')
+                messages.success(request, 'Convidado cadastrado com sucesso em todos os eventos selecionados!')
+                return redirect('lista_eventos')
+            except IntegrityError as e:
+                messages.error(request, f'Erro: {str(e)}')
+                return render(request, 'evento/cadastrar_convidado.html', {'form': form})
+            except Exception as e:
+                logger.error(f"Erro inesperado: {str(e)}")
+                messages.error(request, f'Erro ao cadastrar convidado: {str(e)}')
+                return render(request, 'evento/cadastrar_convidado.html', {'form': form})
+        else:
+            messages.error(request, 'Por favor, corrija os erros no formulário.')
+            logger.debug(f"Erros do formulário: {form.errors}")
     else:
         form = ConvidadoForm()
     return render(request, 'evento/cadastrar_convidado.html', {'form': form})
