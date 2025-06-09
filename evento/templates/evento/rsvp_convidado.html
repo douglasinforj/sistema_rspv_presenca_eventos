@@ -16,6 +16,8 @@
                 {% endfor %}
             {% endif %}
 
+            
+
             <p class="text-muted text-center">Digite seu CPF para confirmar a presença no evento.</p>
 
             <!-- Formulário de Busca -->
@@ -54,6 +56,12 @@
                     {% endfor %}
                 </ul>
             </div>
+            {% endif %}
+            
+            {% if user.is_authenticated %}
+                <div class="text-center mt-4">
+                    <a href="{% url 'lista_eventos' %}" class="btn btn-secondary">🔙 Voltar para a Lista</a>
+                </div>
             {% endif %}
         </div>
     </div>

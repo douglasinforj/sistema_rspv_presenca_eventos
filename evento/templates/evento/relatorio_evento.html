@@ -58,4 +58,10 @@
             <h2>{{ checkins }}</h2>
         </div>
     {% endif %}
+
+    {% if user.is_authenticated %}
+                <div class="text-center mt-4">
+                    <a href="{% url 'lista_eventos' %}" class="btn btn-secondary">🔙 Voltar para a Lista</a>
+                </div>
+            {% endif %}
 {% endblock %}
