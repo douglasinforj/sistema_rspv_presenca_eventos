@@ -243,32 +243,45 @@ def rsvp_atendente(request, convidado_id):
 
 
 def rsvp_convidado(request):
-    convidado = None
-    form = None
+    convidados = None
+    form = RSVPForm()
     qr_code = None
 
     if request.method == 'POST':
-        cpf = request.POST.get('cpf', '').strip()
+        cpf = request.POST.get('cpf', '').strip().replace('.', '').replace('-', '')
 
-        try:
-            convidado = Convidado.objects.get(cpf=cpf)
-            confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
-            
-            if 'confirmar' in request.POST:
+        # Busca todos os convidados com o CPF informado
+        convidados = Convidado.objects.filter(cpf=cpf).select_related('evento')
+
+        if not convidados:
+            messages.error(request, 'CPF não encontrado.')
+            return render(request, 'evento/rsvp_convidado.html', {'form': form})
+
+        if 'confirmar' in request.POST:
+            convidado_id = request.POST.get('convidado_id')
+            try:
+                convidado = Convidado.objects.get(id=convidado_id, cpf=cpf)
+                confirmacao, created = Confirmacao.objects.get_or_create(convidado=convidado)
                 form = RSVPForm(request.POST, instance=confirmacao)
                 if form.is_valid():
                     confirmacao = form.save(commit=False)
                     confirmacao.confirmado = True
                     confirmacao.save()
-
                     qr_code = convidado.qrcode.url if convidado.qrcode else None
+                    messages.success(request, f'Presença confirmada para o evento {convidado.evento.nome}!')
+                    return render(request, 'evento/rsvp_sucesso.html', {
+                        'convidado': convidado,
+                        'qr_code': qr_code
+                    })
+                else:
+                    messages.error(request, 'Por favor, corrija os erros no formulário.')
+            except Convidado.DoesNotExist:
+                messages.error(request, 'Convidado inválido.')
 
-                    return render(request, 'evento/rsvp_sucesso.html', {'convidado': convidado, 'qr_code': qr_code})
-
-        except Convidado.DoesNotExist:
-            return render(request, 'evento/rsvp_convidado.html', {'erro': 'CPF não encontrado'})
-
-    return render(request, 'evento/rsvp_convidado.html', {'form': form, 'convidado': convidado})
+    return render(request, 'evento/rsvp_convidado.html', {
+        'form': form,
+        'convidados': convidados
+    })
 
 
 
