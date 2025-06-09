@@ -9,7 +9,7 @@
             <div class="card-header bg-primary text-white text-center">
                 <h4 class="mb-0">Confirmação de Presença</h4>
             </div>
-            
+
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}">{{ message }}</div>
@@ -27,21 +27,32 @@
                 </div>
             </form>
 
-            {% if convidado %}
+            {% if convidados %}
             <div class="mt-4">
                 <h5 class="mb-3">Dados do Convidado</h5>
-                <p><strong>Nome:</strong> {{ convidado.nome }}</p>
-                <p><strong>Email:</strong> {{ convidado.email }}</p>
-                <p><strong>Telefone:</strong> {{ convidado.telefone }}</p>
-                <p><strong>Evento:</strong> {{ convidado.evento.nome }} - {{ convidado.evento.data|date:"d/m/Y H:i" }}</p>
-            
-            <!-- Formulário para Confirmar Presença -->
-                <form method="post">
-                    {% csrf_token %}
-                    <!-- Campo oculto com o CPF -->
-                    <input type="hidden" name="cpf" value="{{ convidado.cpf }}">
-                    <button type="submit" name="confirmar" class="btn btn-success">Confirmar Presença</button>
-                </form>
+                <p><strong>Nome:</strong> {{ convidados.0.nome }}</p>
+                <p><strong>Email:</strong> {{ convidados.0.email }}</p>
+                <p><strong>Telefone:</strong> {{ convidados.0.telefone|default:"Não informado" }}</p>
+                <h6 class="mt-4">Eventos Inscritos:</h6>
+                <ul class="list-group">
+                    {% for convidado in convidados %}
+                    <li class="list-group-item">
+                        <p><strong>Evento:</strong> {{ convidado.evento.nome }} - {{ convidado.evento.data|date:"d/m/Y H:i" }}</p>
+                        {% if convidado.confirmacao and convidado.confirmacao.confirmado %}
+                            <p class="text-success">Presença confirmada</p>
+                        {% else %}
+                            <!-- Formulário para Confirmar Presença -->
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="cpf" value="{{ convidado.cpf }}">
+                                <input type="hidden" name="convidado_id" value="{{ convidado.id }}">
+                                {{ form.as_p }}
+                                <button type="submit" name="confirmar" class="btn btn-success btn-sm">Confirmar Presença</button>
+                            </form>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
             {% endif %}
         </div>
