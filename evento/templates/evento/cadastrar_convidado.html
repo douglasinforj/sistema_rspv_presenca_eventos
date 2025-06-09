@@ -10,61 +10,85 @@
         </div>
         <div class="card-body">
 
-            {% comment %}
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert 
-                        {% if message.tags == 'success' %}alert-success
-                        {% elif message.tags == 'error' %}alert-danger
-                        {% else %}alert-warning{% endif %}">
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                         {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
                     </div>
                 {% endfor %}
             {% endif %}
-            {% endcomment %}
 
-            <form method="POST">
+            <form method="POST" role="form" novalidate>
                 {% csrf_token %}
-                
-                <table class="table table-bordered">
-                    
-                    <tbody>
-                        <tr>
-                            <td><label for="id_nome" class="form-label fw-bold">Nome</label></td>
-                            <td>{{ form.nome }}</td>
-                        </tr>
 
-                        <tr>
-                            <td><label for="id_cpf" class="form-label fw-bold">CPF</label></td>
-                            <td>{{ form.cpf }}</td>
-                        </tr>
+                <div class="mb-3 row">
+                    <label for="id_nome" class="col-sm-2 col-form-label fw-bold">Nome <span class="text-danger">*</span></label>
+                    <div class="col-sm-10">
+                        {{ form.nome }}
+                        {% if form.nome.errors %}
+                            <div class="text-danger small">{{ form.nome.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
 
-                        <tr>
-                            <td><label for="id_email" class="form-label fw-bold">E-mail</label></td>
-                            <td>{{ form.email }}</td>
-                        </tr>
+                <div class="mb-3 row">
+                    <label for="id_cpf" class="col-sm-2 col-form-label fw-bold">CPF <span class="text-danger">*</span></label>
+                    <div class="col-sm-10">
+                        {{ form.cpf }}
+                        {% if form.cpf.errors %}
+                            <div class="text-danger small">{{ form.cpf.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
 
-                        <tr>
-                            <td><label for="id_telefone" class="form-label fw-bold">Telefone</label></td>
-                            <td>{{ form.telefone }}</td>
-                        </tr>
+                <div class="mb-3 row">
+                    <label for="id_email" class="col-sm-2 col-form-label fw-bold">E-mail</label>
+                    <div class="col-sm-10">
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
 
-                        <tr>
-                            <td><label for="id_evento" class="form-label fw-bold">Evento</label></td>
-                            <td>{{ form.evento }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div class="mb-3 row">
+                    <label for="id_telefone" class="col-sm-2 col-form-label fw-bold">Telefone</label>
+                    <div class="col-sm-10">
+                        {{ form.telefone }}
+                        {% if form.telefone.errors %}
+                            <div class="text-danger small">{{ form.telefone.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="mb-4 row">
+                    <label class="col-sm-2 col-form-label fw-bold">Eventos</label>
+                    <div class="col-sm-10">
+                        <div class="d-flex flex-wrap gap-3">
+                            {% for checkbox in form.eventos %}
+                                <div class="form-check mt-2  ml-2">
+                                        {{ checkbox.tag }}
+                                    <label class="form-check-label" for="{{ checkbox.id_for_label }}">
+                                        {{ checkbox.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.eventos.errors %}
+                            <div class="text-danger small mt-2">{{ form.eventos.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
 
                 <div class="d-grid mt-4">
                     <button type="submit" class="btn btn-success btn-lg">💾 Salvar</button>
                 </div>
-
-                <div class="text-center mt-3">
-                    <a href="{% url 'lista_eventos' %}" class="btn btn-secondary">🔙 Voltar para a Lista</a>
-                </div>
             </form>
 
+            <div class="text-center mt-4">
+                <a href="{% url 'lista_eventos' %}" class="btn btn-secondary">🔙 Voltar para a Lista</a>
+            </div>
         </div>
     </div>
 </div>
