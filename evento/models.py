@@ -30,7 +30,8 @@ class Convidado(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['cpf', 'evento'], name='unique_cpf_evento')
+            models.UniqueConstraint(fields=['cpf', 'evento'], name='unique_cpf_evento'),
+            models.UniqueConstraint(fields=['email', 'evento'], name='unique_email_evento')
         ]
 
     def __str__(self):
