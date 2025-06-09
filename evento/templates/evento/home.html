@@ -4,6 +4,73 @@
 
 {% block title %}Bem-vindo ao Sistema de Eventos{% endblock %}
 
+{% block extra_head %}
+<style>
+/* Padronizar altura dos cartões */
+.event-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Padronizar imagens */
+.event-card-img {
+    height: 200px; /* Altura fixa para imagens */
+    object-fit: cover; /* Corta a imagem para preencher o espaço */
+    width: 100%;
+}
+
+/* Padronizar títulos */
+.event-card-title {
+    font-size: 1.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; /* Evita quebra de linha */
+}
+
+/* Padronizar corpo do cartão */
+.event-card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px; /* Altura mínima para consistência */
+}
+
+/*Efeito no cartão*/
+.event-card:hover {
+    transform: translateY(-5px);
+    transition: transform 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Ajustar botão */
+.event-card-body .btn {
+    margin-top: auto; /* Alinha o botão na parte inferior */
+}
+
+/* Ajustar responsividade */
+@media (max-width: 576px) {
+    .event-card-img {
+        height: 150px; /* Reduz altura da imagem em telas pequenas */
+    }
+    .event-card-title {
+        font-size: 1.1rem;
+    }
+    .event-card-body {
+        min-height: 100px;
+    }
+}
+
+/* Estilizar mensagem de vazio */
+.alert-warning {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -16,18 +83,17 @@
             {% if eventos %}
             <div class="row mt-4 {% if eventos|length == 1 %}justify-content-center{% endif %}">
                 {% for evento in eventos %}
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-lg">
+                <div class="col-12 col-sm-6 col-md-4 mb-4">
+                    <div class="card shadow-lg event-card">
                         {% if evento.imagem and evento.imagem.url %}
-                            <img src="{{ evento.imagem.url }}" class="d-block w-100" alt="{{ evento.nome }}">
+                            <img src="{{ evento.imagem.url }}" class="event-card-img" alt="{{ evento.nome }}">
                         {% else %}
-                            <img src="/static/image/default-event.png" class="d-block w-100" alt="Imagem padrão do evento">
+                            <img src="{% static 'image/default-event.png' %}" class="event-card-img" alt="Imagem padrão do evento">
                         {% endif %}
-
-                        <div class="card-body text-center">
-                            <h5 class="card-title">{{ evento.nome }}</h5>
-                            <p class="card-text text-muted">{{ evento.data|date:"d/m/Y H:i" }}</p>
-                            <a href="{% url 'detalhes_evento' evento.id %}" class="btn btn-primary">Detalhes</a>
+                        <div class="card-body text-center event-card-body">
+                            <h5 class="card-title event-card-title">{{ evento.nome }}</h5>
+                            <p class="card-text text-muted mb-2">{{ evento.data|date:"d/m/Y H:i" }}</p>
+                            <a href="{% url 'detalhes_evento' evento.id %}" class="btn btn-primary btn-sm">Detalhes</a>
                         </div>
                     </div>
                 </div>
